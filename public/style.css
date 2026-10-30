@@ -1,0 +1,388 @@
+/* DINO Mail — A Little Mail, A Big World
+   设计语言：暖色邮政信纸。
+   ——点阵纸纹、等宽字眉标、邮票卡、相纸白框、航空信封条纹。
+   工艺上参考 ip.fs.kg 的纪律感，气质上保留小恐龙的温柔。 */
+
+:root {
+  --bg: #F6F3EA;            /* warm paper, matches image haze */
+  --ink: #22343B;           /* deep sea ink */
+  --ink-soft: #5A6B70;
+  --accent: #4E9455;        /* dino green */
+  --accent-deep: #3C7A45;
+  --sky: #BFDCEA;
+  --sunset: #E8A56B;
+  --card: #FFFFFF;
+  --line: rgba(34, 52, 59, .12);
+  --radius: 18px;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --shadow-card: 0 1px 2px rgba(34,52,59,.05), 0 16px 32px -20px rgba(34,52,59,.28);
+  --shadow-card-hover: 0 2px 3px rgba(34,52,59,.06), 0 24px 44px -20px rgba(34,52,59,.34);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+::selection { background: rgba(78, 148, 85, .28); }
+
+/* Fluid base scale: on big/hi-dpi screens everything (rem-based text & spacing)
+   grows smoothly instead of looking tiny — removes the "needs 150% zoom" feel */
+html {
+  font-size: clamp(15px, 0.48rem + 0.52vw, 21px);
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  font-family: "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background-color: var(--bg);
+  /* 邮局点阵纸纹：hero 有自己的图，点阵只在纸面上出现 */
+  background-image: radial-gradient(rgba(34, 52, 59, .07) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+
+/* headings: Fraunces soft serif (EN); CJK falls through to Han stack */
+h1, h2, h3, .headline, .sec-title, .join-title, .kicker, .brand-name, .foot-brand, .spirit-quote, .addr {
+  font-family: "Fraunces", "Georgia", "PingFang SC", "Microsoft YaHei", serif;
+}
+
+section[id] { scroll-margin-top: 76px; }
+
+/* ---------- 眉标：等宽字 + 色块（贯穿全站的记号系统） ---------- */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: .72rem; font-weight: 600;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 18px;
+}
+.eyebrow::before { content: ""; width: 9px; height: 9px; background: var(--accent); border-radius: 2px; flex: none; }
+.eyebrow.alt::before { background: var(--sunset); }
+.eyebrow.sky::before { background: var(--sky); }
+
+/* ---------- topbar ---------- */
+.topbar {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  display: flex; align-items: center; gap: 28px;
+  padding: 14px clamp(20px, 5vw, 56px);
+  transition: background .3s, box-shadow .3s, padding .3s;
+}
+.topbar.scrolled {
+  background: rgba(246, 243, 234, .86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 var(--line);
+  padding-top: 10px; padding-bottom: 10px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .02em; }
+.brand-mark {
+  width: 36px; height: 36px;
+  border-radius: 10px; border: 1.5px solid rgba(34, 52, 59, .18);
+  background: #fff; padding: 2px;
+  box-shadow: 0 2px 6px rgba(20, 40, 50, .18);
+}
+.brand-name { font-size: 1.02rem; }
+.nav { display: flex; gap: 22px; margin-left: auto; font-size: .92rem; }
+.nav a { position: relative; opacity: .85; }
+/* 划线动效：绿线从左长出来 */
+.nav a::after {
+  content: ""; position: absolute; left: 0; bottom: -5px;
+  width: 0; height: 2px; border-radius: 2px;
+  background: var(--accent); transition: width .2s;
+}
+.nav a:hover { opacity: 1; }
+.nav a:hover::after { width: 100%; }
+/* over the hero photo the nav sits on sky, not paper — a white halo keeps it crisp */
+.topbar:not(.scrolled) .nav a,
+.topbar:not(.scrolled) .brand-name { text-shadow: 0 1px 3px rgba(255, 255, 255, .7); }
+.topbar-right { display: flex; align-items: center; gap: 12px; margin-left: 4px; }
+.lang-btn {
+  font: inherit; font-size: .85rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.55); color: inherit;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 5px 13px 5px 9px; font-weight: 600;
+  transition: background .2s, transform .16s, box-shadow .16s;
+}
+.lang-btn:hover {
+  background: rgba(255,255,255,.85); transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(34, 52, 59, .12);
+}
+.topbar.scrolled .lang-btn { background: transparent; }
+.lang-flag { display: block; flex: none; border-radius: 2px; box-shadow: 0 0 0 1.5px rgba(34, 52, 59, .4); }
+.lang-txt { letter-spacing: .02em; white-space: nowrap; }
+/* 旗帜跟当前语言走：英文页显示中国旗 + 中文，中文页显示英国旗 + EN（同 ip.fs.kg） */
+.lang-btn .flag-en { display: none; }
+html[lang="zh-CN"] .lang-btn .flag-zh { display: none; }
+html[lang="zh-CN"] .lang-btn .flag-en { display: block; }
+@media (max-width: 640px) {
+  .lang-btn { padding: 6px 9px; }
+  .lang-btn .lang-txt { display: none; }
+}
+.cta-mini {
+  font-size: .85rem; font-weight: 600; color: #fff;
+  background: var(--accent-deep); border-radius: 999px; padding: 6px 16px;
+  box-shadow: 0 8px 18px -8px rgba(60, 122, 69, .55);
+  transition: background .2s, transform .16s, box-shadow .2s;
+}
+.cta-mini:hover { background: var(--accent); transform: translateY(-1px); }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex; align-items: center;
+  background: url("img/dino.webp") center / cover no-repeat;
+}
+.hero-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(246,243,234,0) 30%, rgba(246,243,234,.38) 55%, rgba(246,243,234,.78) 78%, rgba(246,243,234,.92) 100%);
+}
+.hero-fade {
+  position: absolute; inset: auto 0 0 0; height: 160px;
+  background: linear-gradient(180deg, rgba(246,243,234,0), var(--bg));
+}
+.hero-inner {
+  position: relative; width: 100%;
+  padding: 110px clamp(20px, 5vw, 56px) 90px;
+  display: flex; justify-content: flex-end;
+}
+.hero-copy { max-width: 40rem; text-align: left; }
+.kicker {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: var(--mono); font-size: .74rem; font-weight: 700;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent-deep); margin-bottom: 16px;
+}
+.kicker::before { content: ""; width: 9px; height: 9px; background: var(--accent); border-radius: 2px; }
+.headline {
+  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+  line-height: 1.06; font-weight: 750; letter-spacing: -0.015em;
+  margin-bottom: 20px;
+}
+/* 记号笔高亮：一条横过字腰的色带（中文由 landing.js 注入同样的 mark） */
+.hl {
+  padding: .02em .14em; margin: 0 -.02em; border-radius: .16em;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.hl-sky { background: linear-gradient(180deg, transparent 14%, rgba(191, 220, 234, .8) 14%, rgba(191, 220, 234, .8) 86%, transparent 86%); }
+.hl-sunset { background: linear-gradient(180deg, transparent 14%, rgba(232, 165, 107, .5) 14%, rgba(232, 165, 107, .5) 86%, transparent 86%); }
+.sub {
+  font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+  color: var(--ink-soft); max-width: 30em; margin-bottom: 24px;
+  text-wrap: pretty;
+}
+/* the address plus the slogan that decodes it — a stamp-like card */
+.hero-id {
+  position: relative;
+  background: rgba(255, 255, 255, .74);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(34, 52, 59, .2);
+  border-radius: 14px;
+  padding: 14px 18px 12px;
+  max-width: 27em;
+  margin-bottom: 30px;
+  box-shadow: 0 12px 28px -16px rgba(34, 52, 59, .4);
+}
+/* 邮票齿孔：内圈虚线 */
+.hero-id::after {
+  content: ""; position: absolute; inset: 5px;
+  border: 1.5px dashed rgba(34, 52, 59, .16); border-radius: 10px;
+  pointer-events: none;
+}
+.addr { font-size: 1.14rem; margin-bottom: 5px; letter-spacing: .01em; }
+.addr-dim { color: var(--ink-soft); }
+.addr-strong { font-weight: 750; color: var(--accent-deep); }
+/* slogan that decodes the domain: d.i. + f.s. */
+.tagline {
+  font-size: .875rem; letter-spacing: .05em; color: var(--ink-soft);
+  margin: 0;
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px;
+}
+.tl-key {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700; color: var(--accent-deep); letter-spacing: .02em;
+}
+.tl-sep { opacity: .45; margin: 0 2px; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-block; font-weight: 650; font-size: .98rem;
+  padding: 13px 26px; border-radius: 999px;
+  transition: transform .16s, background .2s, color .2s, box-shadow .2s;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn-solid {
+  background: var(--accent-deep); color: #fff;
+  box-shadow: 0 2px 0 rgba(20, 40, 26, .22), 0 12px 24px -10px rgba(60, 122, 69, .55);
+}
+.btn-solid:hover { background: var(--accent); box-shadow: 0 2px 0 rgba(20, 40, 26, .18), 0 16px 30px -10px rgba(60, 122, 69, .6); }
+.btn-ghost { background: rgba(255, 255, 255, .72); color: var(--ink); border: 1.5px solid rgba(34, 52, 59, .18); }
+.btn-ghost:hover { background: #fff; box-shadow: 0 12px 24px -14px rgba(34, 52, 59, .45); }
+.btn-light { background: #fff; color: var(--accent-deep); box-shadow: 0 14px 30px -12px rgba(14, 28, 36, .55); }
+
+/* ---------- sections ---------- */
+.section { padding: clamp(76px, 9vw, 128px) 0; }
+.wrap { max-width: 76rem; margin: 0 auto; padding: 0 clamp(20px, 5vw, 40px); }
+.section-alt {
+  background-color: #EFEAE0;
+  background-image: radial-gradient(rgba(34, 52, 59, .055) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+.sec-title {
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+  font-weight: 720; letter-spacing: -0.015em; margin-bottom: 12px;
+  text-wrap: balance;
+}
+.sec-sub { color: var(--ink-soft); margin-bottom: clamp(34px, 4vw, 52px); font-size: 1.06rem; text-wrap: pretty; }
+
+.cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+}
+.card {
+  position: relative;
+  background: var(--card);
+  border: 1.5px solid rgba(34, 52, 59, .16);
+  border-radius: 16px;
+  padding: clamp(24px, 2.2rem, 40px) clamp(22px, 2rem, 36px);
+  box-shadow: var(--shadow-card);
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+}
+.card:hover { transform: translateY(-4px); border-color: rgba(78, 148, 85, .4); box-shadow: var(--shadow-card-hover); }
+/* 角落的等宽字序号 —— 版面上的小邮戳 */
+.card-no {
+  position: absolute; top: 18px; right: 20px;
+  font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .1em;
+  color: rgba(34, 52, 59, .35);
+}
+.card-accent { background: var(--accent-deep); color: #fff; border-color: transparent; box-shadow: 0 2px 0 rgba(20,40,26,.18), 0 20px 40px -20px rgba(60, 122, 69, .55); }
+.card-accent .card-no { color: rgba(255, 255, 255, .55); }
+/* icons sit in a tinted plate — a bare 24px line icon looks lost in this padding */
+.card-ico {
+  width: 46px; height: 46px; border-radius: 13px;
+  display: grid; place-items: center;
+  border: 1px solid var(--line);
+  background: rgba(78, 148, 85, .1);
+  color: var(--accent-deep); margin-bottom: 20px;
+}
+.card-ico svg { width: 24px; height: 24px; }
+/* 每张卡一种底色：绿 / 天蓝 / 暖橙 */
+.card.tint-sky .card-ico { background: rgba(191, 220, 234, .38); color: #2E5E75; border-color: rgba(46, 94, 117, .18); }
+.card.tint-sunset .card-ico { background: rgba(232, 165, 107, .24); color: #8A5A1E; border-color: rgba(138, 90, 30, .2); }
+.card-accent .card-ico { background: rgba(255, 255, 255, .16); color: #DFF3E2; border-color: rgba(255, 255, 255, .25); }
+.card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; text-wrap: balance; }
+.card p { font-size: .95rem; color: var(--ink-soft); text-wrap: pretty; }
+.card-accent p { color: rgba(255,255,255,.85); }
+
+/* ---------- spirit ---------- */
+.spirit-grid {
+  display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(30px, 5vw, 64px);
+  align-items: center;
+}
+.spirit-copy p { margin-bottom: 16px; color: var(--ink-soft); max-width: 34em; }
+.spirit-quote {
+  font-size: 1.3rem; font-weight: 700; color: var(--ink) !important;
+  border-left: 3px solid var(--accent); padding-left: 16px;
+  margin-top: 22px;
+}
+/* 相纸白框 + 轻微歪斜：像钉在软木板上的一张照片 */
+.spirit-fig { padding: 6px 14px 18px 6px; }
+.spirit-fig img {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  background: #fff; padding: 10px;
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 60px -24px rgba(34, 52, 59, .45);
+  transform: rotate(-1.6deg);
+  transition: transform .3s;
+}
+.spirit-fig img:hover { transform: rotate(0deg); }
+
+/* ---------- join ---------- */
+.section-join {
+  position: relative; color: #fff; text-align: center;
+  background: url("img/dino-sky.webp") center 38% / cover no-repeat;
+}
+.section-join::before {
+  content: ""; position: absolute; inset: 0;
+  /* a radial pool of shade behind the copy — the old bottom-only gradient left
+     white text sitting on bright cloud, which was hard to read */
+  background:
+    radial-gradient(ellipse 72% 104% at 50% 46%, rgba(20, 36, 44, .62), rgba(20, 36, 44, 0) 76%),
+    linear-gradient(180deg, rgba(246, 243, 234, 0) 0%, rgba(38, 58, 66, .45) 55%, rgba(30, 48, 56, .65) 100%);
+}
+/* 航空信封的红蓝斜纹压在底边 —— 「信」的经典符号 */
+.section-join::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 10px;
+  background: repeating-linear-gradient(-45deg,
+    #C8102E 0 16px, #F6F3EA 16px 32px, #012169 32px 48px, #F6F3EA 48px 64px);
+}
+/* white on a photograph needs a halo, not just a darker scrim */
+.join-title, .join-sub { text-shadow: 0 2px 18px rgba(14, 28, 36, .5), 0 1px 2px rgba(14, 28, 36, .28); }
+.join-inner { position: relative; padding-bottom: 26px; }
+.join-title { font-size: clamp(2rem, 4vw, 3rem); font-weight: 750; margin-bottom: 12px; }
+.join-sub { color: rgba(255,255,255,.88); margin-bottom: 32px; font-size: 1.05rem; }
+
+/* ---------- footer — 信头式 ---------- */
+.footer {
+  border-top: 2px solid var(--ink);
+  padding: 44px 0 36px; color: var(--ink-soft);
+}
+.foot-grid {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 28px; flex-wrap: wrap;
+}
+.foot-brand { font-weight: 750; color: var(--ink); font-size: 1.05rem; margin-bottom: 6px; }
+.foot-line { font-size: .95rem; }
+.foot-tag {
+  font-size: .76rem; letter-spacing: .08em; color: var(--accent-deep); opacity: .8;
+  margin-top: 6px; font-family: var(--mono);
+}
+.foot-col-r { text-align: right; }
+.foot-links {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: flex-end;
+  font-size: .88rem;
+}
+.foot-links a { color: var(--ink-soft); border-bottom: 1px solid transparent; padding-bottom: 1px; transition: color .15s, border-color .15s; }
+.foot-links a:hover { color: var(--accent-deep); border-bottom-color: var(--accent); }
+.foot-note { font-size: .78rem; opacity: .75; margin-top: 14px; font-family: var(--mono); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 860px) {
+  /* .nav is what carries margin-left:auto on desktop — without this the
+     language/sign-in group collapses next to the logo instead of sitting right */
+  .nav { display: none; }
+  .topbar-right { margin-left: auto; }
+  .cards { grid-template-columns: 1fr; }
+  .spirit-grid { grid-template-columns: 1fr; }
+  .spirit-fig { order: -1; padding: 0 8px 16px 0; }
+}
+@media (max-width: 640px) {
+  /* lift the illustration so the headline no longer lands across the dino's face */
+  .hero { background-position: 30% 34%; }
+  .hero-scrim {
+    background: linear-gradient(180deg,
+      rgba(246, 243, 234, .08) 26%,
+      rgba(246, 243, 234, .55) 50%,
+      rgba(246, 243, 234, .93) 70%,
+      var(--bg) 82%);
+  }
+  .hero-inner { justify-content: flex-start; align-items: flex-end; min-height: 100svh; padding-bottom: 52px; }
+  .hero-copy { max-width: 100%; padding-left: 8px; }
+  .headline { font-size: clamp(1.95rem, 8.4vw, 2.5rem); margin-bottom: 14px; }
+  .sub { font-size: .96rem; margin-bottom: 16px; }
+  .hero-id { padding-top: 11px; margin-bottom: 22px; }
+  .addr { font-size: 1.04rem; margin-bottom: 4px; }
+  .tagline { font-size: .8rem; letter-spacing: .03em; }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+  .btn { text-align: center; padding: 12px 22px; }
+  .eyebrow { margin-bottom: 12px; }
+  .foot-grid { flex-direction: column; }
+  .foot-col-r { text-align: left; }
+  .foot-links { justify-content: flex-start; }
+}

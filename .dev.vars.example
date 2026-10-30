@@ -1,0 +1,17 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+# Generate SESSION_SECRET with: openssl rand -base64 32
+
+SESSION_SECRET=
+RESEND_API_KEY=
+RESEND_WEBHOOK_SECRET=
+TELEGRAM_BOT_TOKEN=
+
+# First admin, created only when the users table is empty.
+BOOTSTRAP_ADMIN_ADDRESS=
+BOOTSTRAP_ADMIN_PASSWORD=
+
+# Inserted if missing. Leave empty in production and mint codes from the admin pane.
+BOOTSTRAP_INVITE=
+
+# Local only. Never set this on a deployed worker.
+ALLOW_UNSIGNED_WEBHOOKS=
